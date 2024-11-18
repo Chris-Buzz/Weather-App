@@ -10,7 +10,7 @@ import pytz
 
 def get_weather(event=None):
     city = textfield.get()
-    api_key = "27813a1f3eb806c48f81c63fe6e371af"  # Replace with your actual API key
+    api_key = "27813a1f3eb806c48f81c63fe6e371af"  
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
     complete_url = f"{base_url}q={city}&appid={api_key}&units=imperial"
 
