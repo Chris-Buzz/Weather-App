@@ -7,15 +7,16 @@ from timezonefinder import TimezoneFinder
 from datetime import datetime
 import pytz
 
+api_key = "27813a1f3eb806c48f81c63fe6e371af"  
 
-def get_weather(event=None):
+def get_weather():
     city = textfield.get()
-    api_key = "27813a1f3eb806c48f81c63fe6e371af"  
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
     complete_url = f"{base_url}q={city}&appid={api_key}&units=imperial"
 
     response = requests.get(complete_url)
     weather_data = response.json()
+
 
     if weather_data['cod'] == 200:
         city_name = weather_data['name']
@@ -28,7 +29,7 @@ def get_weather(event=None):
         weather_description = weather_data['weather'][0]['description']
 
         # Calculate local time
-        geolocator = Nominatim(user_agent="geoapiExercises")
+        geolocator = Nominatim(user_agent="WeatherApp")
         location = geolocator.geocode(city)
         find = TimezoneFinder()
         result = find.timezone_at(lng=location.longitude, lat=location.latitude)
@@ -46,7 +47,6 @@ def get_weather(event=None):
         humidity_start.config(text=f"HUMIDITY: {humidity}%")
         weather_conditiontext.config(text =f"{weather_condtion}")
         weather_start.config(text=f"WEATHER:{weather_description.title()}")
-
         # Display textual weather conditions
         if weather_condtion == "Clear":
             weather_icon_label.config(text="☀️ Sunny", fg="yellow")
@@ -67,68 +67,143 @@ def get_weather(event=None):
     else:
         messagebox.showerror("Error", weather_data["message"])
 
-        
 def show_forecast():
-    city = textfield.get()
-    api_key = '27813a1f3eb806c48f81c63fe6e371af  # Replace with your actual API key'
+    city_name = textfield.get()
+    url = f'https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}'
+    req = requests.get(url)
+    data = req.json()
 
-    # Use OpenWeatherMap Geocoding API to get latitude and longitude of the city
-    geo_url = f"http://api.openweathermap.org/geo/1.0/direct?q={city}&limit=1&appid={api_key}"
-    geo_response = requests.get(geo_url)
-    geo_data = geo_response.json()
+    name = data['name']
+    lon = data['coord']['lon']
+    lat = data['coord']['lat']
 
-    lat = geo_data[0]['lat']
-    lon = geo_data[0]['lon']
+    url2 = f'https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=imperial'
+    req2 = requests.get(url2)
+    data2 = req2.json()
 
-        # Use OneCall API for forecast
-    forecast_url = f"https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=current,minutely,hourly,alerts&units=imperial&appid={api_key}"
-    forecast_response = requests.get(forecast_url)
-    forecast_data = forecast_response.json()
+    for widget in forecast_frame.winfo_children():
+        widget.destroy()
+    
+    Label(forecast_frame, text = "5-Day Forecast", font = ("Comic Sans", 20, "bold"), bg = "#FFA500")
 
-    print(forecast_data)  # Debugging line to inspect the structure
+    temps = []
+    winds = []
+    gusts = []
+    max_temps = []
+    min_temps = []
+    max_winds = []
+    min_winds = []
+    max_gusts = []
+    min_gusts = []
+    humidity = []
+    day_descriptions = []
+    night_descriptions = []
+    dates = []
 
-    if 'daily' in forecast_data:  # Check if 'daily' exists in the response
-            # Clear the forecast frame
-            for widget in forecast_frame.winfo_children():
-                widget.destroy()
+    today = datetime.now().date().isoformat()
+    current_day = None  
 
-            Label(forecast_frame, text="7-Day Forecast", font=("Helvetica", 20, "bold"), bg="#FFA500", fg="white").pack(pady=10)
+    for entry in data2['list']:
+        date_txt = entry['dt_txt']
+        hour = int(date_txt.split(" ")[1].split(":")[0])
+        day = date_txt.split(" ")[0]
 
-            # Display forecast data
-            for day in forecast_data['daily']:
-                dt = datetime.fromtimestamp(day['dt'])
-                day_name = dt.strftime('%A')
-                temp_min = day['temp']['min']
-                temp_max = day['temp']['max']
-                description = day['weather'][0]['description'].title()
+        if day == today:
+            continue
 
-                forecast_label = Label(forecast_frame, 
-                                       text=f"{day_name}: {description}, High: {temp_max:.1f}°F, Low: {temp_min:.1f}°F",
-                                       font=("Helvetica", 15), bg="#FFA500", fg="white")
-                forecast_label.pack()
-    else:
-            messagebox.showerror("Error", "Forecast data not available in response.")
- 
+        if current_day is not None and day != current_day:
+            if temps:
+                max_temps.append(max(temps))
+                min_temps.append(min(temps))
+                temps = []
+            if winds:
+                max_winds.append(max(winds))
+                min_winds.append(min(winds))
+                winds =[]
+            if gusts:
+                max_gusts.append(max(gusts))
+                min_gusts.append(min(gusts))
+                gusts = []
 
+        current_day = day
 
-# Main Window
+        
+        if hour <= 21:
+            temps.append(entry['main']['temp'])
+            winds.append(entry['wind']['speed'])
+            gusts.append(entry['wind']['gust'])
+
+        if hour == 0 :  
+                humidity.append(entry['main']['humidity'])
+                day_descriptions.append(entry['weather'][0]['main'] + ": " + entry['weather'][0]['description'])
+                dates.append(current_day)
+        elif hour == 12:
+            if 'weather' in entry and len(entry['weather']) > 0:
+                night_descriptions.append(entry['weather'][0]['main'] + ": " + entry['weather'][0]['description'])
+            else:
+                night_descriptions.append("No data available")
+
+    if temps:
+        max_temps.append(max(temps))
+        min_temps.append(min(temps))
+    if winds:
+        max_winds.append(max(winds))
+        min_winds.append(min(winds))
+    if gusts:
+        max_gusts.append(max(gusts))
+        min_gusts.append(min(gusts))
+
+    def get_day_of_week(date_str):
+        date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+        return date_obj.strftime('%A')
+
+    Label(forecast_frame, text=f"5-Day Forecast for {city_name}", font=("Helvetica", 16, "bold"), bg="#FFA500", fg="white").pack(pady=10)
+    
+    for day in range(len(dates)):
+            day_frame = Frame(forecast_frame, bg="#FFA500", pady=10, padx=10, relief=RIDGE, bd=2)
+            day_frame.pack(side = LEFT, expand = True, fill = BOTH ,  padx = 5, pady = 5)
+
+            date = dates[day]
+            weekDay = get_day_of_week(date)
+
+            forecast_text = f"""
+    {weekDay} - {date}\n
+    High: {max_temps[day]:,.0f}°F  |  Low: {min_temps[day]:,.0f}°F
+    Wind: {min_winds[day]:,.0f} - {max_winds[day]:,.0f} MPH
+    Gusts: {min_gusts[day]:,.0f} - {max_gusts[day]:,.0f} MPH
+    Humidity: {humidity[day]:,.0f}%
+    Day Conditions:
+    {day_descriptions[day]}
+    Night conditions:
+    {night_descriptions[day]}
+            """
+
+            Label(day_frame, text=forecast_text, font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left").pack()
+
+def show_both(event = None):
+    get_weather()
+    show_forecast()
+    
+
 root = Tk()
 root.title("Weather App")
-root.geometry("900x500+300+200")
+root.geometry("1000x1000+300+200")
 root.resizable(False, False)
 
-# Search field and button
 textfield = tk.Entry(root, justify="center", width=17, font=("Helvetica", 25, "bold"), bg="#FFA500", border=0, fg="white")
 textfield.place(x=300, y=30)
 textfield.focus()
-root.bind('<Return>', get_weather)
+root.bind('<Return>', show_both)
 
-search_button = Button(root, text="Search", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=get_weather)
+search_button = Button(root, text="Search", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=show_both)
 search_button.place(x=620, y=30)
 
-forecast_button = Button(root, text="7-Day Forecast", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=show_forecast)
-forecast_button.place(x=620, y=45)
-# Weather data labels
+forecast_frame = Frame(root, bg="white", width = 1000,height = 650)
+forecast_frame.place(x = 0, y = 600)
+for i in range(5):
+    forecast_frame.columnconfigure(i, weight=1)
+
+
 city_start = Label(root, font=("arial", 35, "bold"), bg="#FFA500")
 city_start.place(x=30, y=90)
 
@@ -139,24 +214,22 @@ temp_start = Label(root, text="...", font=("Comic Sans", 40, "bold"), bg="#FFA50
 temp_start.place(x=550, y= 200)
 
 feels_start = Label(root, text="...", font=("Comic Sans", 20, "bold"), bg="#FFA500")
-feels_start.place(x=550, y=300)
+feels_start.place(x=400, y=300)
 
 wind_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
 wind_start.place(x=20, y=430)
 
 humidity_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
-humidity_start.place(x=300, y=430)
+humidity_start.place(x=200, y=430)
 
 weather_conditiontext = Label(root, text="...", font=("Comic Sans", 25, "bold"), bg="#FFA500")
-weather_conditiontext.place(x=550, y=120)
+weather_conditiontext.place(x=500, y=120)
 
 weather_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
-weather_start.place(x=600, y=430)
+weather_start.place(x=400, y=430)
 
 weather_icon_label = Label(root, text="...", font=("Helvetica", 30), bg="#FFA500")
 weather_icon_label.place(x=200, y=180)
 
-forecast_frame = Frame(root, bg="#FFA500", width=800, height=200)
-forecast_frame.place(x=50, y=500)
 
 root.mainloop()
