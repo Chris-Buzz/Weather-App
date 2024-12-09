@@ -7,154 +7,261 @@ from timezonefinder import TimezoneFinder
 from datetime import datetime
 import pytz
 
-root = Tk()
-root.title("Weather App")
-root.geometry("900x500+300+200")
-root.resizable(False, False)
+api_key = "27813a1f3eb806c48f81c63fe6e371af"
+saved_cities = []
 
-
-def get_weather(event = None):
+def get_weather():
     city = textfield.get()
-    # Get API key from OpenWeatherMap (replace YOUR_API_KEY with your actual key)
-    api_key = "27813a1f3eb806c48f81c63fe6e371af"
     base_url = "http://api.openweathermap.org/data/2.5/weather?"
     complete_url = f"{base_url}q={city}&appid={api_key}&units=imperial"
 
-   
     response = requests.get(complete_url)
     weather_data = response.json()
 
-    if weather_data['cod'] == 200:
-            # Extract required data
-            city_name = weather_data['name']
-            country_name = weather_data['sys']['country']
-            timezone_offset = weather_data['timezone']
-            wind = weather_data['wind']['speed']
-            temperature = weather_data['main']['temp']
-            feels_like = weather_data['main']['feels_like']
-            humidity = weather_data['main']['humidity']
-            weather_condtion = weather_data['weather'][0]['main']
-            weather_description = weather_data['weather'][0]['description']
+   
+    def addCity():
+        if city not in saved_cities:
+            saved_cities.append(city)
+            print(saved_cities)
 
-            # Calculate local time
-            geolocator = Nominatim(user_agent = "geoapiExercises")
-            location = geolocator.geocode(city)
-            find = TimezoneFinder()
-            result = find.timezone_at(lng = location.longitude, lat = location.latitude)
-
-            city_entered  = pytz.timezone(result)
-            local_time = datetime.now(city_entered)
-            current_time = local_time.strftime("%I:%M %p")
-            clock.config(text = current_time)
-            time.config(text = "CURRENT WEATHER")
-            
-            # Update labels with data
-            city_start.config(text=f"{city_name}, {country_name}")
-            time_label.config(text=f"{local_time}")
-            temp_start.config(text=f"{temperature}°F")
-            feels_start.config(text=f"{feels_like}°F")
-            wind_start.config(text=f"{wind} MPH")
-            humidity_start.config(text=f"{humidity}%")
-            weather_start.config(text=f"{weather_description.title()}")
-
-            if weather_condition == "Clear":
-                icon_path = "icons/sunny.png"
-            elif weather_condition == "Clouds":
-                icon_path = "icons/cloudy.png"
-            elif weather_condition == "Rain":
-                icon_path = "icons/rainy.png"
-            elif weather_condition == "Snow":
-                icon_path = "icons/snowy.png"
-            elif weather_condition == "Drizzle":
-                icon_path = "icons/drizzle.png"
-            elif weather_condition == "Thunderstorm":
-                icon_path = "icons/thunderstorm.png"
-            elif weather_condition == "Mist":
-                icon_path = "icons/mist.png"
-            else:
-                icon_path = "icons/default.png"  # Default icon if condition not matched
-
-            weather_icon_image = PhotoImage(file=icon_path)
-            icon_label.config(image=weather_icon_image)
-            icon_label.image = weather_icon_image
+            saved_city = Frame(saved_city_frame, bg="#FFA500", pady=10, padx=10, relief=RIDGE, bd=2)
+            saved_city.pack(side = TOP, expand = True, fill = BOTH ,  padx = 5, pady = 5)
+            for city_name in range(len(saved_cities)):
+                if i >5:
+                    break
+                else:
+                    i = o
+                    for city in saved_cities:
+                        i+=1
+                        Label(saved_city, text=saved_cities[city_name[i], font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left").pack())
+            save_button.destroy()
         
+
+    save_button = Button(root, text="Save City", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=  addCity)
+    save_button.place(x=820, y=30)
+    
+    
+
+    if weather_data['cod'] == 200:
+        city_name = weather_data['name']
+        country_name = weather_data['sys']['country']
+        wind = weather_data['wind']['speed']
+        temperature = weather_data['main']['temp']
+        feels_like = weather_data['main']['feels_like']
+        humidity = weather_data['main']['humidity']
+        weather_condtion = weather_data['weather'][0]['main']
+        weather_description = weather_data['weather'][0]['description']
+
+        
+        geolocator = Nominatim(user_agent="WeatherApp")
+        location = geolocator.geocode(city)
+        find = TimezoneFinder()
+        result = find.timezone_at(lng=location.longitude, lat=location.latitude)
+
+        city_timezone = pytz.timezone(result)
+        local_time = datetime.now(city_timezone)
+        current_time = local_time.strftime("%I:%M %p")
+
+      
+        city_start.config(text=f"{city_name}, {country_name}")
+        clock.config(text=current_time)
+        temp_start.config(text=f"{temperature}°F")
+        feels_start.config(text=f"FEELS LIKE:{feels_like}°F")
+        wind_start.config(text=f"WIND:{wind} MPH")
+        humidity_start.config(text=f"HUMIDITY: {humidity}%")
+        weather_conditiontext.config(text =f"{weather_condtion}")
+        weather_start.config(text=f"WEATHER:{weather_description.title()}")
+ 
+        if weather_condtion == "Clear":
+            weather_icon_label.config(text="☀️ Sunny", fg="yellow")
+        elif weather_condtion == "Clouds":
+            weather_icon_label.config(text="☁️ Cloudy", fg="gray")
+        elif weather_condtion == "Rain":
+            weather_icon_label.config(text="🌧️ Rainy", fg="blue")
+        elif weather_condtion == "Snow":
+            weather_icon_label.config(text="❄️ Snowy", fg="lightblue")
+        elif weather_condtion == "Drizzle":
+            weather_icon_label.config(text="🌦️ Drizzle", fg="blue")
+        elif weather_condtion == "Thunderstorm":
+            weather_icon_label.config(text="⛈️ Thunderstorm", fg="purple")
+        elif weather_condtion == "Mist":
+            weather_icon_label.config(text="🌫️ Misty", fg="white")
+        else:
+            weather_icon_label.config(text="🌡️ Unknown", fg="red")
     else:
-            messagebox.showerror("Error", weather_data["message"])
+        messagebox.showerror("Error", weather_data["message"])
+        
+
+#Display 5 day forecast
+    def show_forecast(city_name):
+        url = f'https://api.openweathermap.org/data/2.5/weather?q={city_name}&appid={api_key}'
+        req = requests.get(url)
+        data = req.json()
+
+        name = data['name']
+        lon = data['coord']['lon']
+        lat = data['coord']['lat']
+
+        url2 = f'https://api.openweathermap.org/data/2.5/forecast?lat={lat}&lon={lon}&appid={api_key}&units=imperial'
+        req2 = requests.get(url2)
+        data2 = req2.json()
+
+        for widget in forecast_frame.winfo_children():
+            widget.destroy()
+        
+        Label(forecast_frame, text = "5-Day Forecast", font = ("Comic Sans", 20, "bold"), bg = "#FFA500")
+
+        temps = []
+        winds = []
+        gusts = []
+        max_temps = []
+        min_temps = []
+        max_winds = []
+        min_winds = []
+        max_gusts = []
+        min_gusts = []
+        humidity = []
+        day_descriptions = []
+        night_descriptions = []
+        dates = []
+
+        today = datetime.now().date().isoformat()
+        current_day = None  
+
+        for entry in data2['list']:
+            date_txt = entry['dt_txt']
+            hour = int(date_txt.split(" ")[1].split(":")[0])
+            day = date_txt.split(" ")[0]
+
+            if day == today:
+                continue
+
+            if current_day is not None and day != current_day:
+                if temps:
+                    max_temps.append(max(temps))
+                    min_temps.append(min(temps))
+                    temps = []
+                if winds:
+                    max_winds.append(max(winds))
+                    min_winds.append(min(winds))
+                    winds =[]
+                if gusts:
+                    max_gusts.append(max(gusts))
+                    min_gusts.append(min(gusts))
+                    gusts = []
+
+            current_day = day
+
+            
+            if hour <= 21:
+                temps.append(entry['main']['temp'])
+                winds.append(entry['wind']['speed'])
+                gusts.append(entry['wind']['gust'])
+
+            if hour == 0 :  
+                    humidity.append(entry['main']['humidity'])
+                    day_descriptions.append(entry['weather'][0]['main'] + ": " + entry['weather'][0]['description'])
+                    dates.append(current_day)
+            elif hour == 12:
+                if 'weather' in entry and len(entry['weather']) > 0:
+                    night_descriptions.append(entry['weather'][0]['main'] + ": " + entry['weather'][0]['description'])
+                else:
+                    night_descriptions.append("No data available")
+
+        if temps:
+            max_temps.append(max(temps))
+            min_temps.append(min(temps))
+        if winds:
+            max_winds.append(max(winds))
+            min_winds.append(min(winds))
+        if gusts:
+            max_gusts.append(max(gusts))
+            min_gusts.append(min(gusts))
+
+        def get_day_of_week(date_str):
+            date_obj = datetime.strptime(date_str, '%Y-%m-%d')
+            return date_obj.strftime('%A')
+
+        Label(forecast_frame, text=f"5-Day Forecast for {city_name}", font=("Helvetica", 16, "bold"), bg="#FFA500", fg="white").pack(pady=10)
+        
+        for day in range(len(dates)):
+                day_frame = Frame(forecast_frame, bg="#FFA500", pady=10, padx=10, relief=RIDGE, bd=2)
+                day_frame.pack(side = LEFT, expand = True, fill = BOTH ,  padx = 5, pady = 5)
+
+                date = dates[day]
+                weekDay = get_day_of_week(date)
+
+                forecast_text = f"""
+        {weekDay} - {date}\n
+        High: {max_temps[day]:,.0f}°F  |  Low: {min_temps[day]:,.0f}°F
+        Wind: {min_winds[day]:,.0f} - {max_winds[day]:,.0f} MPH
+        Gusts: {min_gusts[day]:,.0f} - {max_gusts[day]:,.0f} MPH
+        Humidity: {humidity[day]:,.0f}%
+        Day Conditions:
+        {day_descriptions[day]}
+        Night conditions:
+        {night_descriptions[day]}
+                """
+
+                Label(day_frame, text=forecast_text, font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left").pack()
+
+
+#call forecast when weather is called
+    show_forecast(city)
+    
 
 
 
-# Search field and button
-Search_image = PhotoImage(file = "search.png")
-myimage = Label (image = Search_image)
-myimage.place(x=20,y=20)
+root = Tk()
+root.title("Weather App")
+root.geometry("1000x1000+300+200")
+root.resizable(False, False)
 
 textfield = tk.Entry(root, justify="center", width=17, font=("Helvetica", 25, "bold"), bg="#FFA500", border=0, fg="white")
-textfield.place(x=50, y=40)
+textfield.place(x=300, y=30)
 textfield.focus()
-
-
 root.bind('<Return>', get_weather)
 
-#Search Icon
-search_icon = PhotoImage(file="search_icon.png")  # Replace with your actual file path
-search_button = Button(image=search_icon, borderwidth=0, cursor="hand2", bg="#FFA500", command = get_weather)
-search_button.place(x=400, y=34)
 
-#Logo
-logo_image = PhotoImage(file="logo.png")  # Replace with your actual file path
-logo = Label(image=logo_image)
-logo.place(x=150, y=100)
+search_button = Button(root, text="Search", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=get_weather)
+search_button.place(x=620, y=30)
 
-#Text box
-Text_box = PhotoImage(file = "box.png")
-box_image = Label(image = Text_box)
-box_image.pack(padx=5,pady=5,side=BOTTOM)
+forecast_frame = Frame(root, bg="white", width = 1000,height = 650)
+forecast_frame.place(x = 0, y = 600)
+for i in range(5):
+    forecast_frame.columnconfigure(i, weight=1)
 
-#time
-city_start = Label( font = ("arial",40,"bold"),bg ="#FFA500")
-city_start.place(x =30, y = 100)
-time = Label(root, font = ("arial", 15, "bold"))
-time.place(x = 30, y =130)
-clock = Label(root, font =("Helvetica", 20))
+saved_city_frame = Frame(root, bg="white", width = 300,height = 500)
+saved_city_frame.place(x = 800, y = 50)
+
+Label(saved_city_frame, text = "Saved Cities",font=("Helvetica", 14, "bold"), bg="#FFA500", fg="white").pack(pady=10) 
+
+city_start = Label(root, font=("arial", 35, "bold"), bg="#FFA500")
+city_start.place(x=30, y=90)
+
+clock = Label(root, font=("Helvetica", 20))
 clock.place(x=30, y=160)
 
-# Labels for weather data
+temp_start = Label(root, text="...", font=("Comic Sans", 40, "bold"), bg="#FFA500")
+temp_start.place(x=550, y= 200)
 
-temp_label = Label(root, text = "TEMPERATURE" ,font=("Helvetica", 15), fg="white", bg="#FFA500")
-temp_label.place(x=230, y=400,)
+feels_start = Label(root, text="...", font=("Comic Sans", 20, "bold"), bg="#FFA500")
+feels_start.place(x=400, y=300)
 
-feels_like_label = Label(root, text = "FEELS LIKE",font=("Helvetica", 15), fg="white", bg="#FFA500")
-feels_like_label.place(x=300, y=400)
+wind_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
+wind_start.place(x=20, y=430)
 
-wind_label =Label(root, text = "WIND ", font=("Helvetica", 15), fg="white", bg="#FFA500")
-wind_label.place(x = 380,y =400)
+humidity_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
+humidity_start.place(x=200, y=430)
 
-humidity_label = Label(root, text ="HUMIDITY" ,font=("Helvetica", 15), fg="white", bg="#FFA500")
-humidity_label.place(x=450, y=400)
+weather_conditiontext = Label(root, text="...", font=("Comic Sans", 25, "bold"), bg="#FFA500")
+weather_conditiontext.place(x=500, y=120)
 
-weather_label = Label(root, text = "WEATHER DESCRIPTION", font=("Helvetica", 15), fg="white", bg="#FFA500")
-weather_label.place(x=550, y=400)
+weather_start = Label(root, text="...", font=("Comic Sans", 15, "bold"), bg="#FFA500")
+weather_start.place(x=400, y=430)
 
-
-
-
-temp_start = Label(text = "...", font = ("arial",50,"bold"),bg ="#FFA500")
-temp_start.place(x =400, y = 150)
-
-feels_start = Label(text = "...", font=("arial",20,"bold"),bg ="#FFA500")
-feels_start.place(x =330, y = 430)
-
-wind_start = Label(text = "...", font=("arial",20,"bold"),bg ="#FFA500")
-wind_start.place(x =410, y = 430)
-
-humidity_start = Label(text = "...", font=("arial",20,"bold"),bg ="#FFA500")
-humidity_start.place(x =480, y = 430)
-
-weather_start = Label(text = "...", font=("arial",20,"bold"),bg ="#FFA500")
-weather_start.place(x =580, y = 430)
+weather_icon_label = Label(root, text="...", font=("Helvetica", 30), bg="#FFA500")
+weather_icon_label.place(x=200, y=180)
 
 
-
-
-                                
 root.mainloop()
