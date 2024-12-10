@@ -9,6 +9,7 @@ import pytz
 
 api_key = "27813a1f3eb806c48f81c63fe6e371af"
 saved_cities = []
+max_amount = 10
 
 def get_weather():
     city = textfield.get()
@@ -18,26 +19,34 @@ def get_weather():
     response = requests.get(complete_url)
     weather_data = response.json()
 
-   
     def addCity():
-        if city not in saved_cities:
+        global max_amount
+        city = textfield.get()
+        if city not in saved_cities and len(saved_cities) < max_amount:
             saved_cities.append(city)
-            print(saved_cities)
 
-            saved_city = Frame(saved_city_frame, bg="#FFA500", pady=10, padx=10, relief=RIDGE, bd=2)
-            saved_city.pack(side = TOP, expand = True, fill = BOTH ,  padx = 5, pady = 5)
-            for city_name in range(len(saved_cities)):
-                if i >5:
-                    break
-                else:
-                    i = o
-                    for city in saved_cities:
-                        i+=1
-                        Label(saved_city, text=saved_cities[city_name[i], font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left").pack())
-            save_button.destroy()
-        
+            # Create a button for the saved city
+            saved_city = Frame(saved_city_frame, bg="#FFA500")
+            saved_city.pack(side=TOP, fill=BOTH, padx=5, pady=5)
 
-    save_button = Button(root, text="Save City", borderwidth=0, cursor="hand2", bg="#FFA500", fg="white", font=("Helvetica", 15), command=  addCity)
+            def select_city():
+                textfield.delete(0, "end")
+                textfield.insert(0, city)
+                get_weather()
+
+            def remove_city():
+                saved_cities.remove(city)
+                saved_city.destroy()
+
+
+            Button(saved_city, text=city, font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left", command=select_city).pack()
+            Button(saved_city, text="❌",font=("Helvetica", 10, "bold"), bg="#FF6347", fg="white", command=remove_city).pack(side=LEFT, padx=5)
+        elif city in saved_cities:
+            messagebox.showerror("Error", "City already added to favorites")
+        elif len(saved_cities) >= max_amount:
+            messagebox.showerror("Error", f"Limit of {max_amount} saved cities reached")
+
+    save_button = Button(root, text="Save City", bg ="#FFA500", command=addCity)
     save_button.place(x=820, y=30)
     
     
@@ -206,6 +215,27 @@ def get_weather():
                 Label(day_frame, text=forecast_text, font=("Helvetica", 10), bg="#FFA500", fg="white", justify="left").pack()
 
 
+
+    def outfit_inspo():
+
+        if weather_condtion == "Clear":
+           if temperature > 80:
+               print("Top: Short sleeves, Bottom: Shorts")
+        elif weather_condtion == "Clouds":
+            weather_icon_label.config(text="☁️ Cloudy", fg="gray")
+        elif weather_condtion == "Rain":
+            weather_icon_label.config(text="🌧️ Rainy", fg="blue")
+        elif weather_condtion == "Snow":
+            weather_icon_label.config(text="❄️ Snowy", fg="lightblue")
+        elif weather_condtion == "Drizzle":
+            weather_icon_label.config(text="🌦️ Drizzle", fg="blue")
+        elif weather_condtion == "Thunderstorm":
+            weather_icon_label.config(text="⛈️ Thunderstorm", fg="purple")
+        elif weather_condtion == "Mist":
+            weather_icon_label.config(text="🌫️ Misty", fg="white")
+        else:
+            weather_icon_label.config(text="🌡️ Unknown", fg="red")
+        
 #call forecast when weather is called
     show_forecast(city)
     
