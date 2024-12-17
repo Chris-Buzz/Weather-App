@@ -1,18 +1,24 @@
-**Weather App 🌦️*\n
+**Weather App 🌦️*
+
 This Weather App helps users plan their day by providing weather forecasts based on their location. The app uses the OpenWeatherMap API to fetch real-time weather data.
 
 **Features**
+
 Current weather data for a specified location
 5-day weather forecast - free version of OpenWeatherMap
 Intuitive design optimized for both web and mobile
 
 **How It Works**
+
 Backend Development
+
 The backend is coded in Python, where it communicates with the OpenWeatherMap API to fetch weather data based on user input (e.g., city name, ZIP code, or GPS coordinates).
 Current Frontend:
-  Frontend is currently made with a simple tkinter design
+
+Frontend is currently made with a simple tkinter design
 
 **API Calls**
+
 The app interacts with the following OpenWeatherMap endpoints:
 Current Weather Data:
 https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}
@@ -51,11 +57,13 @@ else:
     print("Error:", response.status_code)
 
 **Currently In Development**
+
   Right now the weather app is in a basic tkinter GUI framework design
   My friend who studies graphic design is working on making a custom frontend design in Figma
   Once completed Figma design will be transferred to html & css and using either py-script, flask or django the backend python will be implemented into the design
 
   **New Feautures**
+  
     Providing a daily planner for users so they can plan their days based on weather
     Provide users outfit reccomendations based on the current weather to help them choose what to wear
   
