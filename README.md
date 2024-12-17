@@ -1,4 +1,4 @@
-**Weather App 🌦️*
+**Weather App 🌦️**
 
 This Weather App helps users plan their day by providing weather forecasts based on their location. The app uses the OpenWeatherMap API to fetch real-time weather data.
 
@@ -20,18 +20,23 @@ Frontend is currently made with a simple tkinter design
 **API Calls**
 
 The app interacts with the following OpenWeatherMap endpoints:
+
 Current Weather Data:
 https://api.openweathermap.org/data/2.5/weather?q={city name}&appid={API key}
+
 7-Day Weather Forecast:
 https://api.openweathermap.org/data/2.5/onecall?lat={lat}&lon={lon}&exclude=minutely,hourly&appid={API key}
-API Key Setup
+
 
 **To use the OpenWeatherMap API:**
 
 Create an account on OpenWeatherMap.
 Navigate to your account settings and generate an API key under the "API Keys" section.
+
 Copy the key and add it to your project environment file (e.g., .env) as:
+
 makefile
+
 Copy code
 OPENWEATHER_API_KEY=your_api_key
 
@@ -59,7 +64,9 @@ else:
 **Currently In Development**
 
   Right now the weather app is in a basic tkinter GUI framework design
+  
   My friend who studies graphic design is working on making a custom frontend design in Figma
+  
   Once completed Figma design will be transferred to html & css and using either py-script, flask or django the backend python will be implemented into the design
 
   **New Feautures**
