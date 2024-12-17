@@ -1,4 +1,4 @@
-**Weather App 🌦️**
+**Weather App 🌦️*\n
 This Weather App helps users plan their day by providing weather forecasts based on their location. The app uses the OpenWeatherMap API to fetch real-time weather data.
 
 **Features**
