@@ -1,7 +1,7 @@
 import requests
 from datetime import datetime, timedelta
 
-api_key = '27813a1f3eb806c48f81c63fe6e371af'
+api_key = "your_api_key_here"
 city_name = input("Enter city: ")
 
 
