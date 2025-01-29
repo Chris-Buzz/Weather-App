@@ -7,7 +7,7 @@ from timezonefinder import TimezoneFinder
 from datetime import datetime
 import pytz
 
-api_key = "27813a1f3eb806c48f81c63fe6e371af"  
+api_key = "your_api_key_here"
 
 def get_weather():
     city = textfield.get()
